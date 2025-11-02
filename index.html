@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Azizi – Life Game Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-secondary: #1f2437;
+      --bg-tertiary: #2a3049;
+      --border: #2a3049;
+      --border-light: #3a425f;
+      --text-primary: #fff;
+      --text-secondary: #a1a1aa;
+      --text-mono: #94a3b8;
+      --accent-blue: #38bdf8;
+      --tag-high: #b91c1c;
+      --tag-mid: #78350f;
+      --tag-open: #1e3a8a;
+      --tag-active: #065f46;
+      --tag-completed: #047857;
+      --tag-today: #7c3aed;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 24px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      color: var(--text-primary);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 600;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: box-shadow 0.2s;
+    }
+
+    .section:hover {
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-top: 12px;
+    }
+
+    th {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-align: left;
+      padding: 12px;
+      border: 1px solid var(--border-light);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #252a3f;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .tag-high { background: var(--tag-high); color: #fff; }
+    .tag-mid { background: var(--tag-mid); color: #fff; }
+    .tag-open { background: var(--tag-open); color: #fff; }
+    .tag-active { background: var(--tag-active); color: #fff; }
+    .tag-completed { background: var(--tag-completed); color: #fff; }
+    .tag-today { background: var(--tag-today); color: #fff; }
+
+    .xp {
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .progress-wrap {
+      width: 120px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    .progress-wrap input[type="range"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .bar {
+      background: linear-gradient(90deg, var(--accent-blue), #0ea5e9);
+      height: 100%;
+      transition: width 0.3s ease;
+      border-radius: 6px;
+    }
+
+    .bar.completed {
+      background: linear-gradient(90deg, var(--tag-completed), #059669);
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .editable {
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+      display: inline-block;
+      min-width: 40px;
+    }
+
+    .editable:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .editable:focus {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    textarea,
+    select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: inherit;
+      width: 100%;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+    }
+
+    .small {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .pill {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-top: 6px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--text-mono);
+      font-size: 0.8rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .notion-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+
+    .notion-warning strong {
+      color: #f59e0b;
+    }
+
+    .quest-today {
+      background: rgba(124, 58, 237, 0.1);
+      border-left: 3px solid var(--tag-today);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .section {
+        padding: 16px;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      .progress-wrap {
+        width: 100px;
+      }
+    }
+
+    .save-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--tag-active);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+    }
+
+    .calendar-btn {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">✓ Gespeichert</div>
+
+    <!-- Notion Info -->
+    <div class="notion-warning">
+      <strong>📌 Wichtig für Notion:</strong> Notion kann Inhalte nur anzeigen, nicht bearbeiten. 
+      Bearbeite dein Dashboard direkt hier im Browser oder öffne die HTML-Datei. 
+      Alle Änderungen werden automatisch gespeichert. Für Sync zu GitHub siehe README.
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-primary" onclick="saveData()">💾 Daten speichern</button>
+      <button class="btn" onclick="loadData()">📥 Daten laden</button>
+      <button class="btn" onclick="exportData()">📤 Exportieren (JSON)</button>
+      <button class="btn" onclick="importData()">📥 Importieren</button>
+      <button class="btn" onclick="resetData()">🔄 Zurücksetzen</button>
+      <button class="btn" onclick="syncToCalendar()">📅 Google Calendar Sync</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="section">
+      <h1>🎮 SYSTEM AZIZI — LIFE GAME DASHBOARD</h1>
+      <h2>🏁 Player Profile</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" contenteditable="true" data-key="profile.level">24</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">XP (Auto)</div>
+          <div class="stat-value" id="totalXP">0</div>
+          <div class="small" style="margin-top: 4px;">Wird automatisch berechnet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Schulden</div>
+          <div class="stat-value" contenteditable="true" data-key="profile.debt">8000</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">XP Progress</div>
+          <div class="stat-value" id="xpProgressText">50%</div>
+          <div class="progress-wrap" style="margin-top: 8px; width: 100%;">
+            <input type="range" min="0" max="100" value="50" data-key="profile.xpProgress" oninput="updateProgress(this, this.value)">
+            <div class="bar" id="profileXPBar" style="width:50%"></div>
+          </div>
+        </div>
+      </div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr>
+          <td>Name</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.name">Sultani Azizi</span></td>
+        </tr>
+        <tr>
+          <td>Current Quest</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.currentQuest">Bachelor Thesis + Schulden runter</span></td>
+        </tr>
+        <tr>
+          <td>Guild</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.guild">AOE / Pflegedienst Azizi</span></td>
+        </tr>
+        <tr>
+          <td>Difficulty Mode</td>
+          <td>HARD MODE (Mehrere Quests aktiv)</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- TODAY'S QUESTS -->
+    <div class="section">
+      <h2>📅 Quest of the Day</h2>
+      <table id="todayQuestsTable">
+        <tr>
+          <th>Quest</th>
+          <th>Deadline</th>
+          <th>Progress</th>
+          <th>Status</th>
+          <th>XP</th>
+        </tr>
+      </table>
+      <div class="small" style="margin-top: 12px;">Zeigt alle Quests, die heute fällig sind oder in den nächsten 7 Tagen</div>
+    </div>
+
+    <!-- MAIN QUESTS -->
+    <div class="section">
+      <h2>⚔️ Main Quests</h2>
+      <table id="mainQuestsTable">
+        <tr>
+          <th>Quest</th>
+          <th>Deadline</th>
+          <th>Progress</th>
+          <th>Status</th>
+          <th>XP</th>
+          <th>Reward</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addQuest()" style="margin-top: 12px;">+ Neue Quest</button>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="section">
+      <h2>💰 Finance HUD</h2>
+      <table id="financeTable">
+        <tr>
+          <th>Monat</th>
+          <th>Einnahmen (€)</th>
+          <th>Fixkosten (€)</th>
+          <th>Variable (€)</th>
+          <th>Tilgung (€)</th>
+          <th>Schuldenstand (€)</th>
+          <th>XP Gain</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addFinanceMonth()" style="margin-top: 12px;">+ Neuer Monat</button>
+
+      <h3 style="margin-top: 24px;">Fixkosten / laufende Ausgaben</h3>
+      <table id="expensesTable">
+        <tr>
+          <th>Kategorie</th>
+          <th>Beschreibung</th>
+          <th>Betrag (€)</th>
+          <th>Fälligkeit</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addExpense()" style="margin-top: 12px;">+ Neue Ausgabe</button>
+    </div>
+
+    <!-- DEBT TRACKER -->
+    <div class="section">
+      <h2>💳 Schulden Tracker — Detaillierte Übersicht</h2>
+      <div class="stat-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-label">Gesamtschulden</div>
+          <div class="stat-value" id="totalDebtDisplay">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monatliche Tilgung</div>
+          <div class="stat-value" id="totalMonthlyPayment">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Geschätzte Abzahlzeit</div>
+          <div class="stat-value" id="payoffEstimate">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Zinsbelastung/Monat</div>
+          <div class="stat-value" id="monthlyInterest">0 €</div>
+        </div>
+      </div>
+      <table id="debtTrackerTable">
+        <tr>
+          <th>Schuldenquelle</th>
+          <th>Ursprünglicher Betrag (€)</th>
+          <th>Aktueller Betrag (€)</th>
+          <th>Zinssatz (%)</th>
+          <th>Monatliche Rate (€)</th>
+          <th>Nächste Zahlung</th>
+          <th>Geschätztes Abzahldatum</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addDebt()" style="margin-top: 12px;">+ Neue Schuld hinzufügen</button>
+      
+      <h3 style="margin-top: 24px;">Zahlungshistorie</h3>
+      <table id="paymentHistoryTable">
+        <tr>
+          <th>Datum</th>
+          <th>Schuldenquelle</th>
+          <th>Zahlungsbetrag (€)</th>
+          <th>Zinsanteil (€)</th>
+          <th>Verbleibender Betrag (€)</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addPayment()" style="margin-top: 12px;">+ Zahlung erfassen</button>
+    </div>
+
+    <!-- INVESTMENT STRATEGY -->
+    <div class="section">
+      <h2>📈 Investment Strategy — Portfolio & Vermögensaufbau</h2>
+      <div class="stat-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-label">Gesamtportfolio</div>
+          <div class="stat-value" id="totalPortfolioValue">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monatliche Sparrate</div>
+          <div class="stat-value" id="monthlySavings">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gewinn/Verlust</div>
+          <div class="stat-value" id="totalProfitLoss">0 €</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ROI (Gesamt)</div>
+          <div class="stat-value" id="totalROI">0%</div>
+        </div>
+      </div>
+      
+      <h3>Investment Ziele</h3>
+      <table id="investmentGoalsTable">
+        <tr>
+          <th>Ziel</th>
+          <th>Zielbetrag (€)</th>
+          <th>Zeithorizont</th>
+          <th>Aktueller Stand (€)</th>
+          <th>Fortschritt</th>
+          <th>Monatlicher Betrag</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addInvestmentGoal()" style="margin-top: 12px;">+ Neues Investment-Ziel</button>
+
+      <h3 style="margin-top: 24px;">Portfolio Übersicht</h3>
+      <table id="portfolioTable">
+        <tr>
+          <th>Asset Typ</th>
+          <th>Name/Symbol</th>
+          <th>Kaufdatum</th>
+          <th>Kaufpreis (€)</th>
+          <th>Aktueller Wert (€)</th>
+          <th>Menge</th>
+          <th>Gewinn/Verlust (€)</th>
+          <th>ROI (%)</th>
+          <th>Allokation (%)</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addPortfolioItem()" style="margin-top: 12px;">+ Neues Asset hinzufügen</button>
+
+      <h3 style="margin-top: 24px;">Asset Allocation</h3>
+      <div id="allocationChart" style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+        <div class="small">Asset Allocation wird automatisch berechnet</div>
+      </div>
+
+      <h3 style="margin-top: 24px;">Investment Strategie & Regeln</h3>
+      <div style="margin-top: 12px;">
+        <textarea id="investmentStrategy" rows="6" style="width: 100%;" placeholder="Deine Investment-Regeln, Strategien und Notizen...&#10;&#10;Beispiel:&#10;- 50% ETFs (Diversifikation)&#10;- 30% Einzelaktien (Growth)&#10;- 20% Crypto/Risiko&#10;- Nur investieren wenn Notgroschen (3x Monatsausgaben) vorhanden&#10;- Dollar-Cost-Averaging: Monatlich 300€"></textarea>
+      </div>
+      <button class="btn" onclick="saveInvestmentStrategy()" style="margin-top: 12px;">💾 Strategie speichern</button>
+    </div>
+
+    <!-- STUDY -->
+    <div class="section">
+      <h2>📘 Study Quest Log (Prüfungen)</h2>
+      <table id="studyTable">
+        <tr>
+          <th>Fach</th>
+          <th>Prüfungstermin</th>
+          <th>Lernstatus</th>
+          <th>Fortschritt</th>
+          <th>Nächster Schritt</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addStudy()" style="margin-top: 12px;">+ Neues Fach</button>
+    </div>
+
+    <!-- THESIS -->
+    <div class="section">
+      <h2>🧠 Thesis Project</h2>
+      <table id="thesisTable">
+        <tr>
+          <th>Phase</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>XP</th>
+          <th>Notizen</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addThesisPhase()" style="margin-top: 12px;">+ Neue Phase</button>
+    </div>
+
+    <!-- FITNESS -->
+    <div class="section">
+      <h2>🏋️ Training Stats</h2>
+      <table id="fitnessTable">
+        <tr>
+          <th>Tag</th>
+          <th>Workout</th>
+          <th>Dauer (min)</th>
+          <th>Intensität (1-10)</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addWorkout()" style="margin-top: 12px;">+ Neues Workout</button>
+      <div class="small" style="margin-top: 12px;">Weekly Goal: 3 Sessions → +35 XP → +1 Vitality Level</div>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="section">
+      <h2>🛍 Business Side Quest (Black Friday Drop)</h2>
+      <table id="businessTable">
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th>Deadline</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addBusinessTask()" style="margin-top: 12px;">+ Neue Task</button>
+    </div>
+
+    <!-- LIFE MAP -->
+    <div class="section">
+      <h2>🗺 Life Map — Main Story Arc</h2>
+      <table id="lifeMapTable">
+        <tr>
+          <th>Zeitraum</th>
+          <th>Lebensziel</th>
+          <th>Karriere</th>
+          <th>Finanzen</th>
+          <th>Privatleben</th>
+          <th>Mental</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addLifeMapEntry()" style="margin-top: 12px;">+ Neuer Eintrag</button>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="section">
+      <h2>🔁 Weekly Review Quest</h2>
+      <p class="small">Jede Woche einmal ausfüllen. Das hält dich ehrlich mit dir selbst.</p>
+      <table id="reviewTable">
+        <tr><th>Frage</th><th>Antwort</th></tr>
+      </table>
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+    <div class="section">
+      <h2>🏆 Achievements / Badges</h2>
+      <table id="achievementsTable">
+        <tr>
+          <th>Badge</th>
+          <th>Beschreibung</th>
+          <th>Datum erreicht</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addAchievement()" style="margin-top: 12px;">+ Achievement hinzufügen</button>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="section">
+      <h2>☯ Quote of the Day</h2>
+      <div class="pill" id="dailyQuote">
+        Loading...
+      </div>
+      <div class="small" style="margin-top: 8px;">Ändert sich täglich automatisch</div>
+    </div>
+  </div>
+
+  <script>
+    // Daily Quotes Array
+    const dailyQuotes = [
+      "Ignore the noise. Build the empire. Collect XP.\nJeder Tag auf Hard Mode ist ein Level-Up.",
+      "Discipline is choosing between what you want now and what you want most.",
+      "Every day is a new quest. Every completed task is XP gained.",
+      "Hard work beats talent when talent doesn't work hard.",
+      "The only bad workout is the one that didn't happen.",
+      "Progress, not perfection. Level up every single day.",
+      "Your future is created by what you do today, not tomorrow.",
+      "Champions aren't made in the gym. Champions are made from something deep inside them.",
+      "Success is the sum of small efforts repeated day in and day out.",
+      "The only way to do great work is to love what you do.",
+      "You don't have to be great to start, but you have to start to be great.",
+      "The harder you work, the luckier you get.",
+      "Dream it. Wish it. Do it. Collect XP along the way.",
+      "Every master was once a beginner. Every pro was once an amateur.",
+      "The moment you give up is the moment you let someone else win.",
+      "Motivation gets you started. Discipline keeps you going.",
+      "Your limitation—it's only your imagination.",
+      "Push yourself, because no one else is going to do it for you.",
+      "Great things never come from comfort zones.",
+      "Dreams don't work unless you do.",
+      "Do something today that your future self will thank you for.",
+      "The only person you should try to be better than is who you were yesterday.",
+      "Fall seven times, stand up eight.",
+      "Success doesn't just find you. You have to go out and get it.",
+      "Don't stop when you're tired. Stop when you're done.",
+      "Wake up with determination. Go to bed with satisfaction.",
+      "Do something worth remembering.",
+      "The pain you feel today is the strength you feel tomorrow.",
+      "Go the extra mile. It's never crowded.",
+      "Success is walking from failure to failure with no loss of enthusiasm."
+    ];
+
+    // Default data structure
+    const defaultData = {
+      profile: {
+        name: "Sultani Azizi",
+        level: 24,
+        xpProgress: 50,
+        currentQuest: "Bachelor Thesis + Schulden runter",
+        guild: "AOE / Pflegedienst Azizi",
+        debt: 8000
+      },
+      mainQuests: [
+        { quest: "💸 Schulden unter 6 000 €", deadline: "2025-12-31", progress: 60, status: "active", xp: 500, reward: "Financial Freedom" },
+        { quest: "🎓 Bachelorarbeit starten", deadline: "2025-11-01", progress: 40, status: "active", xp: 300, reward: "Academic Stability" },
+        { quest: "📚 Klausuren Feb–März 2026", deadline: "2026-03-17", progress: 20, status: "active", xp: 600, reward: "Level-Up + Abschluss sichern" },
+        { quest: "💼 Azure AZ-900 Zertifikat", deadline: "2025-12-31", progress: 20, status: "active", xp: 200, reward: "Skill Boost" },
+        { quest: "🛍️ Black Friday Drop (Handwärmer / Spiegel / Powerbank)", deadline: "2025-11-29", progress: 40, status: "active", xp: 250, reward: "Cash + Marketing Erfahrung" },
+        { quest: "🏋️ Fitness-Routine (3–4x/Woche)", deadline: "laufend", progress: 80, status: "active", xp: 150, reward: "Vitality + Confidence" }
+      ],
+      finance: [
+        { month: "2025-10", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 8000, xp: 50 },
+        { month: "2025-11", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 7000, xp: 50 },
+        { month: "2025-12", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 6000, xp: 100 }
+      ],
+      expenses: [
+        { category: "🏠 Miete (warm)", desc: "Wohnung", amount: 650, frequency: "Monatlich", status: "active" },
+        { category: "⚡ Strom", desc: "Energie", amount: 60, frequency: "Monatlich", status: "active" },
+        { category: "📶 Internet", desc: "DSL/Kabel", amount: 35, frequency: "Monatlich", status: "active" },
+        { category: "📱 Handy", desc: "Mobilfunk", amount: 30, frequency: "Monatlich", status: "active" },
+        { category: "🧾 Versicherungen", desc: "Haftpflicht etc.", amount: 40, frequency: "Jährlich", status: "active" },
+        { category: "🚗 Transport", desc: "ÖPNV/Auto", amount: 80, frequency: "Monatlich", status: "active" },
+        { category: "🍽 Lebensmittel", desc: "Durchschnitt", amount: 250, frequency: "Laufend", status: "variable" },
+        { category: "🎬 Abos", desc: "Netflix/Spotify etc.", amount: 20, frequency: "Monatlich", status: "open" }
+      ],
+      debts: [
+        { source: "Studienkredit", originalAmount: 10000, currentAmount: 8000, interestRate: 2.5, monthlyPayment: 500, nextPayment: "2025-11-01", status: "active" },
+        { source: "Kreditkarte", originalAmount: 2000, currentAmount: 1500, interestRate: 12.0, monthlyPayment: 200, nextPayment: "2025-11-15", status: "active" }
+      ],
+      paymentHistory: [
+        { date: "2025-10-01", source: "Studienkredit", amount: 500, interest: 17, remaining: 8000 },
+        { date: "2025-10-15", source: "Kreditkarte", amount: 200, interest: 15, remaining: 1500 }
+      ],
+      investmentGoals: [
+        { goal: "Notgroschen 3000€", targetAmount: 3000, timeframe: "2026-06", currentAmount: 500, monthlyAmount: 200 },
+        { goal: "ETF Portfolio 10k€", targetAmount: 10000, timeframe: "2027-12", currentAmount: 0, monthlyAmount: 300 },
+        { goal: "Immobilienkredit Vorbereitung", targetAmount: 50000, timeframe: "2029-12", currentAmount: 0, monthlyAmount: 500 }
+      ],
+      portfolio: [
+        { type: "ETF", name: "MSCI World", purchaseDate: "2025-01-15", purchasePrice: 5000, currentValue: 5200, quantity: 1, profitLoss: 200, roi: 4.0, allocation: 0 },
+        { type: "Aktie", name: "Apple (AAPL)", purchaseDate: "2025-03-10", purchasePrice: 1000, currentValue: 1100, quantity: 10, profitLoss: 100, roi: 10.0, allocation: 0 }
+      ],
+      investmentStrategy: "Investment-Regeln:\n- 50% ETFs (Diversifikation)\n- 30% Einzelaktien (Growth)\n- 20% Crypto/Risiko\n- Nur investieren wenn Notgroschen (3x Monatsausgaben) vorhanden\n- Dollar-Cost-Averaging: Monatlich 300€\n- Langfristig orientiert (5+ Jahre)",
+      study: [
+        { subject: "Bodenordnung", date: "2026-02-19", status: "Begonnen", progress: 20, next: "Kapitel 2 lernen", xp: 50 },
+        { subject: "EWF", date: "2026-02-20", status: "Offen", progress: 0, next: "Skript strukturieren", xp: 0 },
+        { subject: "Baukonstruktion", date: "2026-02-27", status: "Offen", progress: 0, next: "Zusammenfassung", xp: 0 },
+        { subject: "Bauphysik", date: "2026-02-27", status: "Offen", progress: 0, next: "Altklausuren analysieren", xp: 0 },
+        { subject: "Investition & Finanzierung", date: "2026-03-11", status: "Offen", progress: 0, next: "Lernplan erstellen", xp: 0 },
+        { subject: "Geotechnik", date: "2026-03-16", status: "Offen", progress: 0, next: "Karteikarten bauen", xp: 0 },
+        { subject: "Baustoffe", date: "2026-03-17", status: "Offen", progress: 0, next: "Rechenaufgaben üben", xp: 0 }
+      ],
+      thesis: [
+        { phase: "Betreuer finden", status: "open", progress: 0, xp: 50, notes: "Warte auf Antwort" },
+        { phase: "Thema fixieren", status: "open", progress: 0, xp: 30, notes: "Start Nov 2025" },
+        { phase: "Exposé schreiben", status: "open", progress: 0, xp: 0, notes: "Start Nov 2025" },
+        { phase: "Literaturrecherche", status: "open", progress: 0, xp: 0, notes: "2h/Woche" },
+        { phase: "Schreiben Kapitel 1–5", status: "open", progress: 0, xp: 0, notes: "Jan–Apr 2026" },
+        { phase: "Korrektur & Abgabe", status: "open", progress: 0, xp: 0, notes: "Mai–Jun 2026" }
+      ],
+      fitness: [
+        { day: "Montag", workout: "Push", duration: 60, intensity: 7, xp: 10 },
+        { day: "Mittwoch", workout: "Pull", duration: 70, intensity: 8, xp: 15 },
+        { day: "Freitag", workout: "Beine", duration: 50, intensity: 6, xp: 10 }
+      ],
+      business: [
+        { task: "Produkt validieren", status: "Fertig", deadline: "2025-11-10", xp: 30 },
+        { task: "Shopify Landingpage", status: "In Arbeit", deadline: "2025-11-15", xp: 20 },
+        { task: "Ad-Kampagnen testen", status: "Offen", deadline: "2025-11-22", xp: 30 },
+        { task: "Black-Friday Launch", status: "Offen", deadline: "2025-11-29", xp: 50 }
+      ],
+      lifeMap: [
+        { period: "2025–2026", life: "Bachelor abschließen", career: "AOE → Automation Engineer", finance: "Schuldenfrei + 3k sparen", private: "Beziehung stabilisieren", mental: "Emotionale Kontrolle" },
+        { period: "2027–2028", life: "Master / Startup", career: "Freelancer AI & Automation", finance: "10k Rücklagen", private: "Eigene Wohnung", mental: "Selbstwert stärken" },
+        { period: "2029–2030", life: "Business skalieren", career: "Eigene Firma", finance: "50k Kapital", private: "Familie", mental: "Ruhe & Freiheit" }
+      ],
+      review: [
+        { question: "3 Wins der Woche", answer: "" },
+        { question: "1 harte Sache, die ich überwunden habe", answer: "" },
+        { question: "1 Lektion gelernt", answer: "" },
+        { question: "XP diese Woche", answer: "" },
+        { question: "Fokus für nächste Woche", answer: "" }
+      ],
+      achievements: [
+        { badge: "💼 First Job", desc: "Joined AOE", date: "" },
+        { badge: "💰 Debt Slayer", desc: "Erste 1 000 € getilgt", date: "" },
+        { badge: "🎓 Scholar Mode", desc: "Thesis gestartet", date: "" },
+        { badge: "🧠 Focus Beast", desc: "30 Tage ohne Ablenkung", date: "" },
+        { badge: "🏋 Gym Rat", desc: "12 Wochen konsequent Training", date: "" }
+      ]
+    };
+
+    let appData = { ...defaultData };
+
+    // Initialize app
+    function init() {
+      loadDataFromStorage();
+      renderDailyQuote();
+      renderAll();
+      calculateTotalXP();
+      setupEventListeners();
+    }
+
+    function renderDailyQuote() {
+      const today = new Date();
+      const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+      const quoteIndex = dayOfYear % dailyQuotes.length;
+      const quote = dailyQuotes[quoteIndex];
+      document.getElementById('dailyQuote').textContent = quote;
+    }
+
+    function calculateTotalXP() {
+      let totalXP = 0;
+      
+      // XP from completed quests (100% progress)
+      appData.mainQuests.forEach(q => {
+        if (q.progress === 100) {
+          totalXP += q.xp || 0;
+        } else {
+          // Partial XP based on progress
+          totalXP += Math.floor((q.xp || 0) * (q.progress / 100));
+        }
+      });
+      
+      // XP from finance months
+      appData.finance.forEach(f => {
+        totalXP += f.xp || 0;
+      });
+      
+      // XP from study
+      appData.study.forEach(s => {
+        if (s.progress === 100) {
+          totalXP += s.xp || 0;
+        } else {
+          totalXP += Math.floor((s.xp || 0) * (s.progress / 100));
+        }
+      });
+      
+      // XP from thesis
+      appData.thesis.forEach(t => {
+        if (t.progress === 100) {
+          totalXP += t.xp || 0;
+        } else {
+          totalXP += Math.floor((t.xp || 0) * (t.progress / 100));
+        }
+      });
+      
+      // XP from fitness
+      appData.fitness.forEach(f => {
+        totalXP += f.xp || 0;
+      });
+      
+      // XP from business
+      appData.business.forEach(b => {
+        if (b.status === "Fertig") {
+          totalXP += b.xp || 0;
+        }
+      });
+      
+      document.getElementById('totalXP').textContent = totalXP;
+      
+      // Update XP progress percentage
+      const currentLevel = parseInt(appData.profile.level) || 24;
+      const xpNeededForNextLevel = currentLevel * 100; // Simple formula
+      const progress = Math.min(100, Math.floor((totalXP % xpNeededForNextLevel) / (xpNeededForNextLevel / 100)));
+      appData.profile.xpProgress = progress;
+      
+      const progressBar = document.getElementById('profileXPBar');
+      const progressText = document.getElementById('xpProgressText');
+      const progressInput = document.querySelector('[data-key="profile.xpProgress"]');
+      if (progressBar) progressBar.style.width = progress + '%';
+      if (progressText) progressText.textContent = progress + '%';
+      if (progressInput) progressInput.value = progress;
+    }
+
+    function setupEventListeners() {
+      document.addEventListener('blur', (e) => {
+        if (e.target.hasAttribute('contenteditable') && e.target.hasAttribute('data-key')) {
+          const key = e.target.getAttribute('data-key');
+          const value = e.target.textContent.trim();
+          setNestedValue(appData, key, value);
+          autoSave();
+          calculateTotalXP();
+        }
+      }, true);
+
+      document.addEventListener('input', (e) => {
+        if (e.target.hasAttribute('data-key')) {
+          const key = e.target.getAttribute('data-key');
+          const value = e.target.value;
+          setNestedValue(appData, key, value);
+          autoSave();
+        }
+      }, true);
+    }
+
+    function setNestedValue(obj, path, value) {
+      const keys = path.split('.');
+      let current = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+    }
+
+    function updateProgress(input, value) {
+      const bar = input.parentElement.querySelector('.bar');
+      const text = document.getElementById('xpProgressText');
+      bar.style.width = value + '%';
+      if (text) text.textContent = value + '%';
+      const key = input.getAttribute('data-key');
+      setNestedValue(appData, key, parseInt(value));
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function getStatusTag(status, progress) {
+      if (progress === 100) {
+        return '<span class="tag tag-completed">Fertig</span>';
+      }
+      switch(status) {
+        case 'open': return '<span class="tag tag-open">Offen</span>';
+        case 'active': return '<span class="tag tag-active">Aktiv</span>';
+        case 'completed': return '<span class="tag tag-completed">Fertig</span>';
+        default: return '<span class="tag tag-open">Offen</span>';
+      }
+    }
+
+    function getTodayQuests() {
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+      
+      return appData.mainQuests.filter(q => {
+        if (q.deadline === 'laufend') return true;
+        const deadline = new Date(q.deadline);
+        return deadline >= today && deadline <= nextWeek;
+      });
+    }
+
+    function renderTodayQuests() {
+      const todayQuests = getTodayQuests();
+      const tbody = document.querySelector('#todayQuestsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      if (todayQuests.length === 0) {
+        const row = tbody.insertRow();
+        row.innerHTML = '<td colspan="5" style="text-align: center; color: var(--text-secondary);">Keine Quests für heute gefunden. Gute Arbeit! 🎉</td>';
+        return;
+      }
+      
+      todayQuests.forEach((q, i) => {
+        const originalIndex = appData.mainQuests.findIndex(quest => quest === q);
+        const row = tbody.insertRow();
+        row.className = 'quest-today';
+        const isToday = q.deadline !== 'laufend' && new Date(q.deadline).toDateString() === new Date().toDateString();
+        row.innerHTML = `
+          <td><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${originalIndex}" data-field="quest">${q.quest}</span></td>
+          <td>${q.deadline === 'laufend' ? 'Laufend' : new Date(q.deadline).toLocaleDateString('de-DE')} ${isToday ? '<span class="tag tag-today">Heute!</span>' : ''}</td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${q.progress}" oninput="updateQuestProgress(this, ${originalIndex})">
+              <div class="bar ${q.progress === 100 ? 'completed' : ''}" style="width:${q.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${q.progress}</span> %</div>
+          </td>
+          <td>${getStatusTag(q.status, q.progress)}</td>
+          <td class="xp">${q.xp} XP</td>
+        `;
+      });
+    }
+
+    function renderAll() {
+      renderProfile();
+      renderTodayQuests();
+      renderMainQuests();
+      renderFinance();
+      renderExpenses();
+      renderDebtTracker();
+      renderPaymentHistory();
+      renderInvestmentGoals();
+      renderPortfolio();
+      renderAssetAllocation();
+      renderInvestmentStrategy();
+      renderStudy();
+      renderThesis();
+      renderFitness();
+      renderBusiness();
+      renderLifeMap();
+      renderReview();
+      renderAchievements();
+    }
+
+    function renderProfile() {
+      document.querySelector('[data-key="profile.name"]').textContent = appData.profile.name;
+      document.querySelector('[data-key="profile.level"]').textContent = appData.profile.level;
+      document.querySelector('[data-key="profile.debt"]').textContent = appData.profile.debt;
+      document.querySelector('[data-key="profile.currentQuest"]').textContent = appData.profile.currentQuest;
+      document.querySelector('[data-key="profile.guild"]').textContent = appData.profile.guild;
+      
+      const progress = appData.profile.xpProgress || 50;
+      const progressInput = document.querySelector('[data-key="profile.xpProgress"]');
+      const progressBar = document.getElementById('profileXPBar');
+      const progressText = document.getElementById('xpProgressText');
+      if (progressInput) progressInput.value = progress;
+      if (progressBar) progressBar.style.width = progress + '%';
+      if (progressText) progressText.textContent = progress + '%';
+    }
+
+    function renderMainQuests() {
+      const tbody = document.querySelector('#mainQuestsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.mainQuests.forEach((q, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="quest">${q.quest}</span></td>
+          <td><input type="date" value="${q.deadline === 'laufend' ? '' : q.deadline}" data-array="mainQuests" data-index="${i}" data-field="deadline" style="width: 140px;" placeholder="laufend"></td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${q.progress}" oninput="updateQuestProgress(this, ${i})">
+              <div class="bar ${q.progress === 100 ? 'completed' : ''}" style="width:${q.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${q.progress}</span> %</div>
+          </td>
+          <td>
+            <select data-array="mainQuests" data-index="${i}" data-field="status" onchange="updateQuestStatus(this, ${i})">
+              <option value="open" ${q.status === 'open' ? 'selected' : ''}>Offen</option>
+              <option value="active" ${q.status === 'active' ? 'selected' : ''}>Aktiv</option>
+              <option value="completed" ${q.status === 'completed' || q.progress === 100 ? 'selected' : ''}>Fertig</option>
+            </select>
+          </td>
+          <td class="xp"><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="xp">${q.xp}</span> XP</td>
+          <td><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="reward">${q.reward}</span></td>
+          <td><button class="btn" onclick="removeQuest(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateQuestProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.mainQuests[index].progress = value;
+      
+      // Auto-complete at 100%
+      if (value === 100) {
+        appData.mainQuests[index].status = 'completed';
+      }
+      
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      
+      // Update bar color
+      if (value === 100) {
+        bar.classList.add('completed');
+      } else {
+        bar.classList.remove('completed');
+      }
+      
+      renderMainQuests();
+      renderTodayQuests();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function updateQuestStatus(select, index) {
+      appData.mainQuests[index].status = select.value;
+      if (select.value === 'completed') {
+        appData.mainQuests[index].progress = 100;
+      }
+      renderMainQuests();
+      renderTodayQuests();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function addQuest() {
+      appData.mainQuests.push({
+        quest: "Neue Quest",
+        deadline: new Date().toISOString().split('T')[0],
+        progress: 0,
+        status: "open",
+        xp: 0,
+        reward: ""
+      });
+      renderMainQuests();
+      renderTodayQuests();
+      autoSave();
+    }
+
+    function removeQuest(index) {
+      if (confirm('Quest wirklich löschen?')) {
+        appData.mainQuests.splice(index, 1);
+        renderMainQuests();
+        renderTodayQuests();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderFinance() {
+      const tbody = document.querySelector('#financeTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.finance.forEach((f, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${f.month}" data-array="finance" data-index="${i}" data-field="month"></td>
+          <td><input type="number" value="${f.income}" data-array="finance" data-index="${i}" data-field="income"></td>
+          <td><input type="number" value="${f.fixed}" data-array="finance" data-index="${i}" data-field="fixed"></td>
+          <td><input type="number" value="${f.variable}" data-array="finance" data-index="${i}" data-field="variable"></td>
+          <td><input type="number" value="${f.payment}" data-array="finance" data-index="${i}" data-field="payment"></td>
+          <td><input type="number" value="${f.debt}" data-array="finance" data-index="${i}" data-field="debt"></td>
+          <td class="xp"><input type="number" value="${f.xp}" data-array="finance" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeFinanceMonth(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addFinanceMonth() {
+      const lastMonth = appData.finance[appData.finance.length - 1];
+      const lastDebt = lastMonth ? lastMonth.debt : 8000;
+      appData.finance.push({
+        month: new Date().toISOString().slice(0, 7),
+        income: 2100,
+        fixed: 1200,
+        variable: 300,
+        payment: 1000,
+        debt: lastDebt - 1000,
+        xp: 50
+      });
+      renderFinance();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function removeFinanceMonth(index) {
+      if (confirm('Monat wirklich löschen?')) {
+        appData.finance.splice(index, 1);
+        renderFinance();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderExpenses() {
+      const tbody = document.querySelector('#expensesTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.expenses.forEach((e, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${e.category}" data-array="expenses" data-index="${i}" data-field="category"></td>
+          <td><input type="text" value="${e.desc}" data-array="expenses" data-index="${i}" data-field="desc"></td>
+          <td><input type="number" value="${e.amount}" data-array="expenses" data-index="${i}" data-field="amount"></td>
+          <td><input type="text" value="${e.frequency}" data-array="expenses" data-index="${i}" data-field="frequency"></td>
+          <td>
+            <select data-array="expenses" data-index="${i}" data-field="status" onchange="updateExpenseStatus(this, ${i})">
+              <option value="active" ${e.status === 'active' ? 'selected' : ''}>Aktiv</option>
+              <option value="variable" ${e.status === 'variable' ? 'selected' : ''}>Variabel</option>
+              <option value="open" ${e.status === 'open' ? 'selected' : ''}>Prüfen</option>
+            </select>
+          </td>
+          <td><button class="btn" onclick="removeExpense(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+      
+      const total = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+      const footer = tbody.insertRow();
+      footer.innerHTML = `
+        <td><b>Gesamt</b></td>
+        <td></td>
+        <td><b>≈${total}</b></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      `;
+    }
+
+    function updateExpenseStatus(select, index) {
+      appData.expenses[index].status = select.value;
+      renderExpenses();
+      autoSave();
+    }
+
+    function addExpense() {
+      appData.expenses.push({
+        category: "Neue Kategorie",
+        desc: "",
+        amount: 0,
+        frequency: "Monatlich",
+        status: "active"
+      });
+      renderExpenses();
+      autoSave();
+    }
+
+    function removeExpense(index) {
+      if (confirm('Ausgabe wirklich löschen?')) {
+        appData.expenses.splice(index, 1);
+        renderExpenses();
+        autoSave();
+      }
+    }
+
+    function renderStudy() {
+      const tbody = document.querySelector('#studyTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.study.forEach((s, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${s.subject}" data-array="study" data-index="${i}" data-field="subject"></td>
+          <td><input type="date" value="${s.date}" data-array="study" data-index="${i}" data-field="date"></td>
+          <td><input type="text" value="${s.status}" data-array="study" data-index="${i}" data-field="status"></td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${s.progress}" oninput="updateStudyProgress(this, ${i})">
+              <div class="bar ${s.progress === 100 ? 'completed' : ''}" style="width:${s.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${s.progress}</span> %</div>
+          </td>
+          <td><input type="text" value="${s.next}" data-array="study" data-index="${i}" data-field="next"></td>
+          <td class="xp"><input type="number" value="${s.xp}" data-array="study" data-index="${i}" data-field="xp"></td>
+          <td><button class="btn" onclick="removeStudy(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateStudyProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.study[index].progress = value;
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      if (value === 100) {
+        bar.classList.add('completed');
+      } else {
+        bar.classList.remove('completed');
+      }
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function addStudy() {
+      appData.study.push({
+        subject: "Neues Fach",
+        date: new Date().toISOString().split('T')[0],
+        status: "Offen",
+        progress: 0,
+        next: "",
+        xp: 0
+      });
+      renderStudy();
+      autoSave();
+    }
+
+    function removeStudy(index) {
+      if (confirm('Fach wirklich löschen?')) {
+        appData.study.splice(index, 1);
+        renderStudy();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderThesis() {
+      const tbody = document.querySelector('#thesisTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.thesis.forEach((t, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${t.phase}" data-array="thesis" data-index="${i}" data-field="phase"></td>
+          <td>
+            <select data-array="thesis" data-index="${i}" data-field="status" onchange="updateThesisStatus(this, ${i})">
+              <option value="open" ${t.status === 'open' ? 'selected' : ''}>Offen</option>
+              <option value="active" ${t.status === 'active' ? 'selected' : ''}>Aktiv</option>
+              <option value="completed" ${t.status === 'completed' || t.progress === 100 ? 'selected' : ''}>Fertig</option>
+            </select>
+          </td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${t.progress}" oninput="updateThesisProgress(this, ${i})">
+              <div class="bar ${t.progress === 100 ? 'completed' : ''}" style="width:${t.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${t.progress}</span> %</div>
+          </td>
+          <td class="xp"><input type="number" value="${t.xp}" data-array="thesis" data-index="${i}" data-field="xp"></td>
+          <td><input type="text" value="${t.notes}" data-array="thesis" data-index="${i}" data-field="notes"></td>
+          <td><button class="btn" onclick="removeThesisPhase(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateThesisStatus(select, index) {
+      appData.thesis[index].status = select.value;
+      if (select.value === 'completed') {
+        appData.thesis[index].progress = 100;
+      }
+      renderThesis();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function updateThesisProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.thesis[index].progress = value;
+      if (value === 100) {
+        appData.thesis[index].status = 'completed';
+      }
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      if (value === 100) {
+        bar.classList.add('completed');
+      } else {
+        bar.classList.remove('completed');
+      }
+      renderThesis();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function addThesisPhase() {
+      appData.thesis.push({
+        phase: "Neue Phase",
+        status: "open",
+        progress: 0,
+        xp: 0,
+        notes: ""
+      });
+      renderThesis();
+      autoSave();
+    }
+
+    function removeThesisPhase(index) {
+      if (confirm('Phase wirklich löschen?')) {
+        appData.thesis.splice(index, 1);
+        renderThesis();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderFitness() {
+      const tbody = document.querySelector('#fitnessTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.fitness.forEach((f, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${f.day}" data-array="fitness" data-index="${i}" data-field="day"></td>
+          <td><input type="text" value="${f.workout}" data-array="fitness" data-index="${i}" data-field="workout"></td>
+          <td><input type="number" value="${f.duration}" data-array="fitness" data-index="${i}" data-field="duration"></td>
+          <td><input type="number" min="1" max="10" value="${f.intensity}" data-array="fitness" data-index="${i}" data-field="intensity"></td>
+          <td class="xp"><input type="number" value="${f.xp}" data-array="fitness" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeWorkout(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addWorkout() {
+      appData.fitness.push({
+        day: "Montag",
+        workout: "Workout",
+        duration: 60,
+        intensity: 7,
+        xp: 10
+      });
+      renderFitness();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function removeWorkout(index) {
+      if (confirm('Workout wirklich löschen?')) {
+        appData.fitness.splice(index, 1);
+        renderFitness();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderBusiness() {
+      const tbody = document.querySelector('#businessTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.business.forEach((b, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${b.task}" data-array="business" data-index="${i}" data-field="task"></td>
+          <td>
+            <select data-array="business" data-index="${i}" data-field="status" onchange="updateBusinessStatus(this, ${i})">
+              <option value="Offen" ${b.status === 'Offen' ? 'selected' : ''}>Offen</option>
+              <option value="In Arbeit" ${b.status === 'In Arbeit' ? 'selected' : ''}>In Arbeit</option>
+              <option value="Fertig" ${b.status === 'Fertig' ? 'selected' : ''}>Fertig</option>
+            </select>
+          </td>
+          <td><input type="date" value="${b.deadline}" data-array="business" data-index="${i}" data-field="deadline"></td>
+          <td class="xp"><input type="number" value="${b.xp}" data-array="business" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeBusinessTask(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateBusinessStatus(select, index) {
+      appData.business[index].status = select.value;
+      renderBusiness();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function addBusinessTask() {
+      appData.business.push({
+        task: "Neue Task",
+        status: "Offen",
+        deadline: new Date().toISOString().split('T')[0],
+        xp: 0
+      });
+      renderBusiness();
+      autoSave();
+    }
+
+    function removeBusinessTask(index) {
+      if (confirm('Task wirklich löschen?')) {
+        appData.business.splice(index, 1);
+        renderBusiness();
+        autoSave();
+        calculateTotalXP();
+      }
+    }
+
+    function renderLifeMap() {
+      const tbody = document.querySelector('#lifeMapTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.lifeMap.forEach((l, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${l.period}" data-array="lifeMap" data-index="${i}" data-field="period"></td>
+          <td><input type="text" value="${l.life}" data-array="lifeMap" data-index="${i}" data-field="life"></td>
+          <td><input type="text" value="${l.career}" data-array="lifeMap" data-index="${i}" data-field="career"></td>
+          <td><input type="text" value="${l.finance}" data-array="lifeMap" data-index="${i}" data-field="finance"></td>
+          <td><input type="text" value="${l.private}" data-array="lifeMap" data-index="${i}" data-field="private"></td>
+          <td><input type="text" value="${l.mental}" data-array="lifeMap" data-index="${i}" data-field="mental"></td>
+          <td><button class="btn" onclick="removeLifeMapEntry(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addLifeMapEntry() {
+      appData.lifeMap.push({
+        period: "2025–2026",
+        life: "",
+        career: "",
+        finance: "",
+        private: "",
+        mental: ""
+      });
+      renderLifeMap();
+      autoSave();
+    }
+
+    function removeLifeMapEntry(index) {
+      if (confirm('Eintrag wirklich löschen?')) {
+        appData.lifeMap.splice(index, 1);
+        renderLifeMap();
+        autoSave();
+      }
+    }
+
+    function renderReview() {
+      const tbody = document.querySelector('#reviewTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.review.forEach((r, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${r.question}</td>
+          <td><textarea data-array="review" data-index="${i}" data-field="answer" rows="2" style="width: 100%;">${r.answer}</textarea></td>
+        `;
+      });
+    }
+
+    function renderAchievements() {
+      const tbody = document.querySelector('#achievementsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.achievements.forEach((a, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${a.badge}" data-array="achievements" data-index="${i}" data-field="badge"></td>
+          <td><input type="text" value="${a.desc}" data-array="achievements" data-index="${i}" data-field="desc"></td>
+          <td><input type="date" value="${a.date}" data-array="achievements" data-index="${i}" data-field="date"></td>
+          <td><button class="btn" onclick="removeAchievement(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addAchievement() {
+      appData.achievements.push({
+        badge: "🏆 Neues Achievement",
+        desc: "",
+        date: ""
+      });
+      renderAchievements();
+      autoSave();
+    }
+
+    function removeAchievement(index) {
+      if (confirm('Achievement wirklich löschen?')) {
+        appData.achievements.splice(index, 1);
+        renderAchievements();
+        autoSave();
+      }
+    }
+
+    // Debt Tracker Functions
+    function renderDebtTracker() {
+      if (!appData.debts) appData.debts = [];
+      if (!appData.paymentHistory) appData.paymentHistory = [];
+      
+      const tbody = document.querySelector('#debtTrackerTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      let totalDebt = 0;
+      let totalMonthlyPayment = 0;
+      let totalMonthlyInterest = 0;
+      
+      appData.debts.forEach((d, i) => {
+        totalDebt += d.currentAmount || 0;
+        totalMonthlyPayment += d.monthlyPayment || 0;
+        const monthlyInterest = ((d.currentAmount || 0) * (d.interestRate || 0) / 100) / 12;
+        totalMonthlyInterest += monthlyInterest;
+        
+        const estimatedPayoff = calculatePayoffDate(d.currentAmount, d.monthlyPayment, d.interestRate);
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${d.source}" data-array="debts" data-index="${i}" data-field="source"></td>
+          <td><input type="number" value="${d.originalAmount}" data-array="debts" data-index="${i}" data-field="originalAmount"></td>
+          <td><input type="number" value="${d.currentAmount}" data-array="debts" data-index="${i}" data-field="currentAmount" onchange="updateDebtCalculations()"></td>
+          <td><input type="number" step="0.1" value="${d.interestRate}" data-array="debts" data-index="${i}" data-field="interestRate" onchange="updateDebtCalculations()"></td>
+          <td><input type="number" value="${d.monthlyPayment}" data-array="debts" data-index="${i}" data-field="monthlyPayment" onchange="updateDebtCalculations()"></td>
+          <td><input type="date" value="${d.nextPayment}" data-array="debts" data-index="${i}" data-field="nextPayment"></td>
+          <td>${estimatedPayoff}</td>
+          <td>
+            <select data-array="debts" data-index="${i}" data-field="status" onchange="updateDebtCalculations()">
+              <option value="active" ${d.status === 'active' ? 'selected' : ''}>Aktiv</option>
+              <option value="paid" ${d.status === 'paid' ? 'selected' : ''}>Abgezahlt</option>
+              <option value="on-hold" ${d.status === 'on-hold' ? 'selected' : ''}>Pausiert</option>
+            </select>
+          </td>
+          <td><button class="btn" onclick="removeDebt(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+      
+      document.getElementById('totalDebtDisplay').textContent = totalDebt.toLocaleString('de-DE') + ' €';
+      document.getElementById('totalMonthlyPayment').textContent = totalMonthlyPayment.toLocaleString('de-DE') + ' €';
+      document.getElementById('monthlyInterest').textContent = totalMonthlyInterest.toFixed(2) + ' €';
+      
+      if (totalDebt > 0 && totalMonthlyPayment > 0) {
+        const avgInterest = appData.debts.reduce((sum, d) => sum + (d.interestRate || 0), 0) / appData.debts.length;
+        const months = calculatePayoffMonths(totalDebt, totalMonthlyPayment, avgInterest);
+        const payoffDate = new Date();
+        payoffDate.setMonth(payoffDate.getMonth() + months);
+        document.getElementById('payoffEstimate').textContent = months + ' Monate (' + payoffDate.toLocaleDateString('de-DE') + ')';
+      } else {
+        document.getElementById('payoffEstimate').textContent = '-';
+      }
+      
+      // Update profile debt
+      appData.profile.debt = totalDebt;
+      if (document.querySelector('[data-key="profile.debt"]')) {
+        document.querySelector('[data-key="profile.debt"]').textContent = totalDebt;
+      }
+    }
+
+    function calculatePayoffDate(currentAmount, monthlyPayment, interestRate) {
+      if (!monthlyPayment || monthlyPayment <= 0) return '-';
+      const monthlyInterest = interestRate / 100 / 12;
+      if (monthlyInterest >= 1) return 'Unendlich';
+      let months = 0;
+      let amount = currentAmount;
+      while (amount > 0 && months < 600) {
+        amount = amount * (1 + monthlyInterest) - monthlyPayment;
+        months++;
+      }
+      if (months >= 600) return '>50 Jahre';
+      const date = new Date();
+      date.setMonth(date.getMonth() + months);
+      return date.toLocaleDateString('de-DE');
+    }
+
+    function calculatePayoffMonths(principal, monthlyPayment, annualInterest) {
+      if (!monthlyPayment || monthlyPayment <= 0) return 999;
+      const monthlyInterest = annualInterest / 100 / 12;
+      if (monthlyInterest <= 0) return Math.ceil(principal / monthlyPayment);
+      if (monthlyInterest >= 1) return 999;
+      return Math.ceil(-Math.log(1 - (principal * monthlyInterest) / monthlyPayment) / Math.log(1 + monthlyInterest));
+    }
+
+    function updateDebtCalculations() {
+      renderDebtTracker();
+      autoSave();
+      calculateTotalXP();
+    }
+
+    function addDebt() {
+      if (!appData.debts) appData.debts = [];
+      appData.debts.push({
+        source: "Neue Schuld",
+        originalAmount: 0,
+        currentAmount: 0,
+        interestRate: 5.0,
+        monthlyPayment: 0,
+        nextPayment: new Date().toISOString().split('T')[0],
+        status: "active"
+      });
+      renderDebtTracker();
+      autoSave();
+    }
+
+    function removeDebt(index) {
+      if (confirm('Schuld wirklich löschen?')) {
+        appData.debts.splice(index, 1);
+        renderDebtTracker();
+        autoSave();
+      }
+    }
+
+    function renderPaymentHistory() {
+      if (!appData.paymentHistory) appData.paymentHistory = [];
+      
+      const tbody = document.querySelector('#paymentHistoryTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.paymentHistory.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((p, i) => {
+        const originalIndex = appData.paymentHistory.findIndex(ph => ph === p);
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="date" value="${p.date}" data-array="paymentHistory" data-index="${originalIndex}" data-field="date"></td>
+          <td><input type="text" value="${p.source}" data-array="paymentHistory" data-index="${originalIndex}" data-field="source"></td>
+          <td><input type="number" value="${p.amount}" data-array="paymentHistory" data-index="${originalIndex}" data-field="amount"></td>
+          <td><input type="number" value="${p.interest}" data-array="paymentHistory" data-index="${originalIndex}" data-field="interest"></td>
+          <td><input type="number" value="${p.remaining}" data-array="paymentHistory" data-index="${originalIndex}" data-field="remaining"></td>
+          <td><button class="btn" onclick="removePayment(${originalIndex})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addPayment() {
+      if (!appData.paymentHistory) appData.paymentHistory = [];
+      if (!appData.debts || appData.debts.length === 0) {
+        alert('Bitte füge zuerst eine Schuld hinzu!');
+        return;
+      }
+      const debtSource = appData.debts[0].source;
+      appData.paymentHistory.push({
+        date: new Date().toISOString().split('T')[0],
+        source: debtSource,
+        amount: 0,
+        interest: 0,
+        remaining: 0
+      });
+      renderPaymentHistory();
+      autoSave();
+    }
+
+    function removePayment(index) {
+      if (confirm('Zahlung wirklich löschen?')) {
+        appData.paymentHistory.splice(index, 1);
+        renderPaymentHistory();
+        autoSave();
+      }
+    }
+
+    // Investment Strategy Functions
+    function renderInvestmentGoals() {
+      if (!appData.investmentGoals) appData.investmentGoals = [];
+      
+      const tbody = document.querySelector('#investmentGoalsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      let totalMonthlySavings = 0;
+      
+      appData.investmentGoals.forEach((g, i) => {
+        totalMonthlySavings += g.monthlyAmount || 0;
+        const progress = g.targetAmount > 0 ? Math.min(100, (g.currentAmount / g.targetAmount) * 100) : 0;
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${g.goal}" data-array="investmentGoals" data-index="${i}" data-field="goal"></td>
+          <td><input type="number" value="${g.targetAmount}" data-array="investmentGoals" data-index="${i}" data-field="targetAmount" onchange="updateInvestmentCalculations()"></td>
+          <td><input type="text" value="${g.timeframe}" data-array="investmentGoals" data-index="${i}" data-field="timeframe"></td>
+          <td><input type="number" value="${g.currentAmount}" data-array="investmentGoals" data-index="${i}" data-field="currentAmount" onchange="updateInvestmentCalculations()"></td>
+          <td>
+            <div class="progress-wrap" style="width: 150px;">
+              <div class="bar ${progress === 100 ? 'completed' : ''}" style="width:${progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${progress.toFixed(1)}</span> %</div>
+          </td>
+          <td><input type="number" value="${g.monthlyAmount}" data-array="investmentGoals" data-index="${i}" data-field="monthlyAmount" onchange="updateInvestmentCalculations()"></td>
+          <td><button class="btn" onclick="removeInvestmentGoal(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+      
+      document.getElementById('monthlySavings').textContent = totalMonthlySavings.toLocaleString('de-DE') + ' €';
+    }
+
+    function addInvestmentGoal() {
+      if (!appData.investmentGoals) appData.investmentGoals = [];
+      appData.investmentGoals.push({
+        goal: "Neues Ziel",
+        targetAmount: 0,
+        timeframe: "2026-12",
+        currentAmount: 0,
+        monthlyAmount: 0
+      });
+      renderInvestmentGoals();
+      autoSave();
+    }
+
+    function removeInvestmentGoal(index) {
+      if (confirm('Investment-Ziel wirklich löschen?')) {
+        appData.investmentGoals.splice(index, 1);
+        renderInvestmentGoals();
+        autoSave();
+      }
+    }
+
+    function renderPortfolio() {
+      if (!appData.portfolio) appData.portfolio = [];
+      
+      const tbody = document.querySelector('#portfolioTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      let totalPortfolio = 0;
+      let totalInvested = 0;
+      let totalProfitLoss = 0;
+      
+      appData.portfolio.forEach((p, i) => {
+        totalPortfolio += p.currentValue || 0;
+        totalInvested += p.purchasePrice || 0;
+        const profitLoss = (p.currentValue || 0) - (p.purchasePrice || 0);
+        totalProfitLoss += profitLoss;
+      });
+      
+      appData.portfolio.forEach((p, i) => {
+        const profitLoss = (p.currentValue || 0) - (p.purchasePrice || 0);
+        const roi = p.purchasePrice > 0 ? ((p.currentValue / p.purchasePrice) - 1) * 100 : 0;
+        const allocation = totalPortfolio > 0 ? ((p.currentValue / totalPortfolio) * 100) : 0;
+        
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>
+            <select data-array="portfolio" data-index="${i}" data-field="type" onchange="updatePortfolioCalculations()">
+              <option value="ETF" ${p.type === 'ETF' ? 'selected' : ''}>ETF</option>
+              <option value="Aktie" ${p.type === 'Aktie' ? 'selected' : ''}>Aktie</option>
+              <option value="Crypto" ${p.type === 'Crypto' ? 'selected' : ''}>Crypto</option>
+              <option value="Fonds" ${p.type === 'Fonds' ? 'selected' : ''}>Fonds</option>
+              <option value="Immobilie" ${p.type === 'Immobilie' ? 'selected' : ''}>Immobilie</option>
+              <option value="Andere" ${p.type === 'Andere' ? 'selected' : ''}>Andere</option>
+            </select>
+          </td>
+          <td><input type="text" value="${p.name}" data-array="portfolio" data-index="${i}" data-field="name"></td>
+          <td><input type="date" value="${p.purchaseDate}" data-array="portfolio" data-index="${i}" data-field="purchaseDate"></td>
+          <td><input type="number" value="${p.purchasePrice}" data-array="portfolio" data-index="${i}" data-field="purchasePrice" onchange="updatePortfolioCalculations()"></td>
+          <td><input type="number" value="${p.currentValue}" data-array="portfolio" data-index="${i}" data-field="currentValue" onchange="updatePortfolioCalculations()"></td>
+          <td><input type="number" step="0.01" value="${p.quantity}" data-array="portfolio" data-index="${i}" data-field="quantity"></td>
+          <td style="color: ${profitLoss >= 0 ? '#10b981' : '#ef4444'}; font-weight: 600;">${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)} €</td>
+          <td style="color: ${roi >= 0 ? '#10b981' : '#ef4444'}; font-weight: 600;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</td>
+          <td>${allocation.toFixed(1)}%</td>
+          <td><button class="btn" onclick="removePortfolioItem(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+      
+      const totalROI = totalInvested > 0 ? ((totalPortfolio / totalInvested) - 1) * 100 : 0;
+      
+      document.getElementById('totalPortfolioValue').textContent = totalPortfolio.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+      document.getElementById('totalProfitLoss').textContent = (totalProfitLoss >= 0 ? '+' : '') + totalProfitLoss.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
+      document.getElementById('totalProfitLoss').style.color = totalProfitLoss >= 0 ? '#10b981' : '#ef4444';
+      document.getElementById('totalROI').textContent = (totalROI >= 0 ? '+' : '') + totalROI.toFixed(2) + '%';
+      document.getElementById('totalROI').style.color = totalROI >= 0 ? '#10b981' : '#ef4444';
+    }
+
+    function updatePortfolioCalculations() {
+      renderPortfolio();
+      renderAssetAllocation();
+      autoSave();
+    }
+
+    function addPortfolioItem() {
+      if (!appData.portfolio) appData.portfolio = [];
+      appData.portfolio.push({
+        type: "ETF",
+        name: "Neues Asset",
+        purchaseDate: new Date().toISOString().split('T')[0],
+        purchasePrice: 0,
+        currentValue: 0,
+        quantity: 1,
+        profitLoss: 0,
+        roi: 0,
+        allocation: 0
+      });
+      renderPortfolio();
+      renderAssetAllocation();
+      autoSave();
+    }
+
+    function removePortfolioItem(index) {
+      if (confirm('Portfolio-Item wirklich löschen?')) {
+        appData.portfolio.splice(index, 1);
+        renderPortfolio();
+        renderAssetAllocation();
+        autoSave();
+      }
+    }
+
+    function renderAssetAllocation() {
+      if (!appData.portfolio) return;
+      
+      const allocation = {};
+      let totalValue = 0;
+      
+      appData.portfolio.forEach(p => {
+        const type = p.type || 'Andere';
+        allocation[type] = (allocation[type] || 0) + (p.currentValue || 0);
+        totalValue += p.currentValue || 0;
+      });
+      
+      const chartDiv = document.getElementById('allocationChart');
+      if (totalValue === 0) {
+        chartDiv.innerHTML = '<div class="small">Noch keine Assets im Portfolio</div>';
+        return;
+      }
+      
+      let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">';
+      Object.keys(allocation).sort((a, b) => allocation[b] - allocation[a]).forEach(type => {
+        const percentage = (allocation[type] / totalValue) * 100;
+        const color = type === 'ETF' ? '#38bdf8' : type === 'Aktie' ? '#10b981' : type === 'Crypto' ? '#f59e0b' : type === 'Immobilie' ? '#8b5cf6' : '#6b7280';
+        html += `
+          <div style="padding: 12px; background: var(--bg-secondary); border-radius: 6px; border-left: 4px solid ${color};">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <strong>${type}</strong>
+              <span>${percentage.toFixed(1)}%</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+              ${allocation[type].toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+            </div>
+            <div class="progress-wrap" style="margin-top: 8px; width: 100%;">
+              <div class="bar" style="width: ${percentage}%; background: ${color};"></div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      chartDiv.innerHTML = html;
+    }
+
+    function renderInvestmentStrategy() {
+      if (!appData.investmentStrategy) {
+        appData.investmentStrategy = "Investment-Regeln:\n- 50% ETFs (Diversifikation)\n- 30% Einzelaktien (Growth)\n- 20% Crypto/Risiko\n- Nur investieren wenn Notgroschen (3x Monatsausgaben) vorhanden\n- Dollar-Cost-Averaging: Monatlich 300€\n- Langfristig orientiert (5+ Jahre)";
+      }
+      document.getElementById('investmentStrategy').value = appData.investmentStrategy;
+    }
+
+    function saveInvestmentStrategy() {
+      appData.investmentStrategy = document.getElementById('investmentStrategy').value;
+      autoSave();
+      showSaveIndicator();
+    }
+
+    function updateInvestmentCalculations() {
+      renderInvestmentGoals();
+      autoSave();
+    }
+
+    // Google Calendar Integration
+    function syncToCalendar() {
+      alert('📅 Google Calendar Integration:\n\n' +
+            'Um Quests mit Google Calendar zu synchronisieren:\n\n' +
+            '1. Öffne Google Calendar\n' +
+            '2. Klicke auf "+ Erstellen"\n' +
+            '3. Für jede Quest mit Deadline:\n' +
+            '   - Titel: Quest Name\n' +
+            '   - Datum: Quest Deadline\n' +
+            '   - Beschreibung: XP + Reward\n\n' +
+            'ODER verwende einen Service wie Zapier/IFTTT\n' +
+            'für automatische Synchronisation.\n\n' +
+            'Für API-Integration benötigst du:\n' +
+            '- Google Calendar API Key\n' +
+            '- OAuth 2.0 Setup\n\n' +
+            'Soll ich dir eine detaillierte Anleitung erstellen?');
+      
+      // Optional: Generate calendar file
+      generateCalendarFile();
+    }
+
+    function generateCalendarFile() {
+      let icsContent = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Life Game Dashboard//EN\n';
+      
+      appData.mainQuests.forEach(q => {
+        if (q.deadline && q.deadline !== 'laufend') {
+          const deadline = new Date(q.deadline);
+          const deadlineEnd = new Date(deadline);
+          deadlineEnd.setHours(deadlineEnd.getHours() + 1);
+          
+          icsContent += 'BEGIN:VEVENT\n';
+          icsContent += `DTSTART:${formatICSDate(deadline)}\n`;
+          icsContent += `DTEND:${formatICSDate(deadlineEnd)}\n`;
+          icsContent += `SUMMARY:${q.quest}\n`;
+          icsContent += `DESCRIPTION:XP: ${q.xp} | Reward: ${q.reward}\n`;
+          icsContent += `STATUS:${q.status === 'completed' ? 'CONFIRMED' : 'TENTATIVE'}\n`;
+          icsContent += 'END:VEVENT\n';
+        }
+      });
+      
+      icsContent += 'END:VCALENDAR';
+      
+      const blob = new Blob([icsContent], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'life-game-quests.ics';
+      link.click();
+    }
+
+    function formatICSDate(date) {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+
+    // Data management
+    function loadDataFromStorage() {
+      const saved = localStorage.getItem('lifeGameDashboard');
+      if (saved) {
+        try {
+          appData = JSON.parse(saved);
+          appData = { ...defaultData, ...appData };
+        } catch (e) {
+          console.error('Error loading data:', e);
+        }
+      }
+    }
+
+    function saveData() {
+      document.querySelectorAll('[data-array]').forEach(el => {
+        const array = el.getAttribute('data-array');
+        const index = parseInt(el.getAttribute('data-index'));
+        const field = el.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          appData[array][index][field] = el.value || el.textContent.trim();
+        }
+      });
+      
+      localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+      showSaveIndicator();
+      calculateTotalXP();
+    }
+
+    function autoSave() {
+      document.querySelectorAll('[data-array]').forEach(el => {
+        const array = el.getAttribute('data-array');
+        const index = parseInt(el.getAttribute('data-index'));
+        const field = el.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+            appData[array][index][field] = el.value;
+          } else {
+            appData[array][index][field] = el.textContent.trim();
+          }
+        }
+      });
+      
+      localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+      showSaveIndicator();
+    }
+
+    function loadData() {
+      loadDataFromStorage();
+      renderAll();
+      calculateTotalXP();
+      showSaveIndicator();
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'life-game-dashboard-' + new Date().toISOString().split('T')[0] + '.json';
+      link.click();
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const imported = JSON.parse(event.target.result);
+              appData = { ...defaultData, ...imported };
+              localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+              renderAll();
+              calculateTotalXP();
+              showSaveIndicator();
+              alert('Daten erfolgreich importiert!');
+            } catch (err) {
+              alert('Fehler beim Importieren: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
+
+    function resetData() {
+      if (confirm('Wirklich alle Daten zurücksetzen? Dies kann nicht rückgängig gemacht werden!')) {
+        appData = JSON.parse(JSON.stringify(defaultData));
+        localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+        renderAll();
+        calculateTotalXP();
+        showSaveIndicator();
+      }
+    }
+
+    function showSaveIndicator() {
+      const indicator = document.getElementById('saveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+
+    document.addEventListener('input', (e) => {
+      if (e.target.hasAttribute('data-array')) {
+        const array = e.target.getAttribute('data-array');
+        const index = parseInt(e.target.getAttribute('data-index'));
+        const field = e.target.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          appData[array][index][field] = e.target.value;
+          autoSave();
+          if (field === 'xp' || field === 'progress') {
+            calculateTotalXP();
+          }
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
+
