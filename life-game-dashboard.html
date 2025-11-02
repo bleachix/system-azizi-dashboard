@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>System Azizi – Life Game Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-secondary: #1f2437;
+      --bg-tertiary: #2a3049;
+      --border: #2a3049;
+      --border-light: #3a425f;
+      --text-primary: #fff;
+      --text-secondary: #a1a1aa;
+      --text-mono: #94a3b8;
+      --accent-blue: #38bdf8;
+      --tag-high: #b91c1c;
+      --tag-mid: #78350f;
+      --tag-open: #1e3a8a;
+      --tag-active: #065f46;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 24px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      color: var(--text-primary);
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 600;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: box-shadow 0.2s;
+    }
+
+    .section:hover {
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-top: 12px;
+    }
+
+    th {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      text-align: left;
+      padding: 12px;
+      border: 1px solid var(--border-light);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #252a3f;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .tag-high { background: var(--tag-high); color: #fff; }
+    .tag-mid { background: var(--tag-mid); color: #fff; }
+    .tag-open { background: var(--tag-open); color: #fff; }
+    .tag-active { background: var(--tag-active); color: #fff; }
+
+    .xp {
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .progress-wrap {
+      width: 120px;
+      background: var(--bg-tertiary);
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    .progress-wrap input[type="range"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .bar {
+      background: linear-gradient(90deg, var(--accent-blue), #0ea5e9);
+      height: 100%;
+      transition: width 0.3s ease;
+      border-radius: 6px;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .editable {
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+      display: inline-block;
+      min-width: 40px;
+    }
+
+    .editable:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .editable:focus {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    textarea,
+    select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: inherit;
+      width: 100%;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: 2px solid var(--accent-blue);
+      outline-offset: 2px;
+    }
+
+    .small {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .pill {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      margin-top: 6px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--text-mono);
+      font-size: 0.8rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--bg-secondary);
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .section {
+        padding: 16px;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      .progress-wrap {
+        width: 100px;
+      }
+    }
+
+    .save-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--tag-active);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Save Indicator -->
+    <div class="save-indicator" id="saveIndicator">✓ Gespeichert</div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-primary" onclick="saveData()">💾 Daten speichern</button>
+      <button class="btn" onclick="loadData()">📥 Daten laden</button>
+      <button class="btn" onclick="exportData()">📤 Exportieren (JSON)</button>
+      <button class="btn" onclick="importData()">📥 Importieren</button>
+      <button class="btn" onclick="resetData()">🔄 Zurücksetzen</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="section">
+      <h1>🎮 SYSTEM AZIZI — LIFE GAME DASHBOARD</h1>
+      <h2>🏁 Player Profile</h2>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Level</div>
+          <div class="stat-value" contenteditable="true" data-key="profile.level">24</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">XP</div>
+          <div class="stat-value" contenteditable="true" data-key="profile.xp">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Schulden</div>
+          <div class="stat-value" contenteditable="true" data-key="profile.debt">8000</div>
+        </div>
+      </div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr>
+          <td>Name</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.name">Sultani Azizi</span></td>
+        </tr>
+        <tr>
+          <td>XP Progress</td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="50" data-key="profile.xpProgress" oninput="updateProgress(this, this.value)">
+              <div class="bar" id="profileXPBar" style="width:50%"></div>
+            </div>
+            <div class="progress-text">
+              <span id="profileXPText">50</span> %
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Current Quest</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.currentQuest">Bachelor Thesis + Schulden runter</span></td>
+        </tr>
+        <tr>
+          <td>Guild</td>
+          <td><span class="editable" contenteditable="true" data-key="profile.guild">AOE / Pflegedienst Azizi</span></td>
+        </tr>
+        <tr>
+          <td>Difficulty Mode</td>
+          <td>HARD MODE (Mehrere Quests aktiv)</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- MAIN QUESTS -->
+    <div class="section">
+      <h2>⚔️ Main Quests</h2>
+      <table id="mainQuestsTable">
+        <tr>
+          <th>Quest</th>
+          <th>Deadline</th>
+          <th>Progress</th>
+          <th>XP</th>
+          <th>Reward</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addQuest()" style="margin-top: 12px;">+ Neue Quest</button>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="section">
+      <h2>💰 Finance HUD</h2>
+      <table id="financeTable">
+        <tr>
+          <th>Monat</th>
+          <th>Einnahmen (€)</th>
+          <th>Fixkosten (€)</th>
+          <th>Variable (€)</th>
+          <th>Tilgung (€)</th>
+          <th>Schuldenstand (€)</th>
+          <th>XP Gain</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addFinanceMonth()" style="margin-top: 12px;">+ Neuer Monat</button>
+
+      <h3 style="margin-top: 24px;">Fixkosten / laufende Ausgaben</h3>
+      <table id="expensesTable">
+        <tr>
+          <th>Kategorie</th>
+          <th>Beschreibung</th>
+          <th>Betrag (€)</th>
+          <th>Fälligkeit</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addExpense()" style="margin-top: 12px;">+ Neue Ausgabe</button>
+    </div>
+
+    <!-- STUDY -->
+    <div class="section">
+      <h2>📘 Study Quest Log (Prüfungen)</h2>
+      <table id="studyTable">
+        <tr>
+          <th>Fach</th>
+          <th>Prüfungstermin</th>
+          <th>Lernstatus</th>
+          <th>Fortschritt</th>
+          <th>Nächster Schritt</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addStudy()" style="margin-top: 12px;">+ Neues Fach</button>
+    </div>
+
+    <!-- THESIS -->
+    <div class="section">
+      <h2>🧠 Thesis Project</h2>
+      <table id="thesisTable">
+        <tr>
+          <th>Phase</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>XP</th>
+          <th>Notizen</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addThesisPhase()" style="margin-top: 12px;">+ Neue Phase</button>
+    </div>
+
+    <!-- FITNESS -->
+    <div class="section">
+      <h2>🏋️ Training Stats</h2>
+      <table id="fitnessTable">
+        <tr>
+          <th>Tag</th>
+          <th>Workout</th>
+          <th>Dauer (min)</th>
+          <th>Intensität (1-10)</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addWorkout()" style="margin-top: 12px;">+ Neues Workout</button>
+      <div class="small" style="margin-top: 12px;">Weekly Goal: 3 Sessions → +35 XP → +1 Vitality Level</div>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="section">
+      <h2>🛍 Business Side Quest (Black Friday Drop)</h2>
+      <table id="businessTable">
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th>Deadline</th>
+          <th>XP</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addBusinessTask()" style="margin-top: 12px;">+ Neue Task</button>
+    </div>
+
+    <!-- LIFE MAP -->
+    <div class="section">
+      <h2>🗺 Life Map — Main Story Arc</h2>
+      <table id="lifeMapTable">
+        <tr>
+          <th>Zeitraum</th>
+          <th>Lebensziel</th>
+          <th>Karriere</th>
+          <th>Finanzen</th>
+          <th>Privatleben</th>
+          <th>Mental</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addLifeMapEntry()" style="margin-top: 12px;">+ Neuer Eintrag</button>
+    </div>
+
+    <!-- REVIEW -->
+    <div class="section">
+      <h2>🔁 Weekly Review Quest</h2>
+      <p class="small">Jede Woche einmal ausfüllen. Das hält dich ehrlich mit dir selbst.</p>
+      <table id="reviewTable">
+        <tr><th>Frage</th><th>Antwort</th></tr>
+      </table>
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+    <div class="section">
+      <h2>🏆 Achievements / Badges</h2>
+      <table id="achievementsTable">
+        <tr>
+          <th>Badge</th>
+          <th>Beschreibung</th>
+          <th>Datum erreicht</th>
+          <th></th>
+        </tr>
+      </table>
+      <button class="btn" onclick="addAchievement()" style="margin-top: 12px;">+ Achievement hinzufügen</button>
+    </div>
+
+    <!-- QUOTE -->
+    <div class="section">
+      <h2>☯ Quote of the System</h2>
+      <div class="pill" contenteditable="true" data-key="quote.text">
+        Ignore the noise. Build the empire. Collect XP.<br>
+        Jeder Tag auf Hard Mode ist ein Level-Up.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Default data structure
+    const defaultData = {
+      profile: {
+        name: "Sultani Azizi",
+        level: 24,
+        xp: 0,
+        xpProgress: 50,
+        currentQuest: "Bachelor Thesis + Schulden runter",
+        guild: "AOE / Pflegedienst Azizi",
+        debt: 8000
+      },
+      mainQuests: [
+        { quest: "💸 Schulden unter 6 000 €", deadline: "2025-12-31", progress: 60, xp: 500, reward: "Financial Freedom" },
+        { quest: "🎓 Bachelorarbeit starten", deadline: "2025-11-01", progress: 40, xp: 300, reward: "Academic Stability" },
+        { quest: "📚 Klausuren Feb–März 2026", deadline: "2026-03-17", progress: 20, xp: 600, reward: "Level-Up + Abschluss sichern" },
+        { quest: "💼 Azure AZ-900 Zertifikat", deadline: "2025-12-31", progress: 20, xp: 200, reward: "Skill Boost" },
+        { quest: "🛍️ Black Friday Drop (Handwärmer / Spiegel / Powerbank)", deadline: "2025-11-29", progress: 40, xp: 250, reward: "Cash + Marketing Erfahrung" },
+        { quest: "🏋️ Fitness-Routine (3–4x/Woche)", deadline: "laufend", progress: 80, xp: 150, reward: "Vitality + Confidence" }
+      ],
+      finance: [
+        { month: "2025-10", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 8000, xp: 50 },
+        { month: "2025-11", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 7000, xp: 50 },
+        { month: "2025-12", income: 2100, fixed: 1200, variable: 300, payment: 1000, debt: 6000, xp: 100 }
+      ],
+      expenses: [
+        { category: "🏠 Miete (warm)", desc: "Wohnung", amount: 650, frequency: "Monatlich", status: "active" },
+        { category: "⚡ Strom", desc: "Energie", amount: 60, frequency: "Monatlich", status: "active" },
+        { category: "📶 Internet", desc: "DSL/Kabel", amount: 35, frequency: "Monatlich", status: "active" },
+        { category: "📱 Handy", desc: "Mobilfunk", amount: 30, frequency: "Monatlich", status: "active" },
+        { category: "🧾 Versicherungen", desc: "Haftpflicht etc.", amount: 40, frequency: "Jährlich", status: "active" },
+        { category: "🚗 Transport", desc: "ÖPNV/Auto", amount: 80, frequency: "Monatlich", status: "active" },
+        { category: "🍽 Lebensmittel", desc: "Durchschnitt", amount: 250, frequency: "Laufend", status: "variable" },
+        { category: "🎬 Abos", desc: "Netflix/Spotify etc.", amount: 20, frequency: "Monatlich", status: "open" }
+      ],
+      study: [
+        { subject: "Bodenordnung", date: "2026-02-19", status: "Begonnen", progress: 20, next: "Kapitel 2 lernen", xp: 50 },
+        { subject: "EWF", date: "2026-02-20", status: "Offen", progress: 0, next: "Skript strukturieren", xp: 0 },
+        { subject: "Baukonstruktion", date: "2026-02-27", status: "Offen", progress: 0, next: "Zusammenfassung", xp: 0 },
+        { subject: "Bauphysik", date: "2026-02-27", status: "Offen", progress: 0, next: "Altklausuren analysieren", xp: 0 },
+        { subject: "Investition & Finanzierung", date: "2026-03-11", status: "Offen", progress: 0, next: "Lernplan erstellen", xp: 0 },
+        { subject: "Geotechnik", date: "2026-03-16", status: "Offen", progress: 0, next: "Karteikarten bauen", xp: 0 },
+        { subject: "Baustoffe", date: "2026-03-17", status: "Offen", progress: 0, next: "Rechenaufgaben üben", xp: 0 }
+      ],
+      thesis: [
+        { phase: "Betreuer finden", status: "open", progress: 0, xp: 50, notes: "Warte auf Antwort" },
+        { phase: "Thema fixieren", status: "open", progress: 0, xp: 30, notes: "Start Nov 2025" },
+        { phase: "Exposé schreiben", status: "open", progress: 0, xp: 0, notes: "Start Nov 2025" },
+        { phase: "Literaturrecherche", status: "open", progress: 0, xp: 0, notes: "2h/Woche" },
+        { phase: "Schreiben Kapitel 1–5", status: "open", progress: 0, xp: 0, notes: "Jan–Apr 2026" },
+        { phase: "Korrektur & Abgabe", status: "open", progress: 0, xp: 0, notes: "Mai–Jun 2026" }
+      ],
+      fitness: [
+        { day: "Montag", workout: "Push", duration: 60, intensity: 7, xp: 10 },
+        { day: "Mittwoch", workout: "Pull", duration: 70, intensity: 8, xp: 15 },
+        { day: "Freitag", workout: "Beine", duration: 50, intensity: 6, xp: 10 }
+      ],
+      business: [
+        { task: "Produkt validieren", status: "Fertig", deadline: "2025-11-10", xp: 30 },
+        { task: "Shopify Landingpage", status: "In Arbeit", deadline: "2025-11-15", xp: 20 },
+        { task: "Ad-Kampagnen testen", status: "Offen", deadline: "2025-11-22", xp: 30 },
+        { task: "Black-Friday Launch", status: "Offen", deadline: "2025-11-29", xp: 50 }
+      ],
+      lifeMap: [
+        { period: "2025–2026", life: "Bachelor abschließen", career: "AOE → Automation Engineer", finance: "Schuldenfrei + 3k sparen", private: "Beziehung stabilisieren", mental: "Emotionale Kontrolle" },
+        { period: "2027–2028", life: "Master / Startup", career: "Freelancer AI & Automation", finance: "10k Rücklagen", private: "Eigene Wohnung", mental: "Selbstwert stärken" },
+        { period: "2029–2030", life: "Business skalieren", career: "Eigene Firma", finance: "50k Kapital", private: "Familie", mental: "Ruhe & Freiheit" }
+      ],
+      review: [
+        { question: "3 Wins der Woche", answer: "" },
+        { question: "1 harte Sache, die ich überwunden habe", answer: "" },
+        { question: "1 Lektion gelernt", answer: "" },
+        { question: "XP diese Woche", answer: "" },
+        { question: "Fokus für nächste Woche", answer: "" }
+      ],
+      achievements: [
+        { badge: "💼 First Job", desc: "Joined AOE", date: "" },
+        { badge: "💰 Debt Slayer", desc: "Erste 1 000 € getilgt", date: "" },
+        { badge: "🎓 Scholar Mode", desc: "Thesis gestartet", date: "" },
+        { badge: "🧠 Focus Beast", desc: "30 Tage ohne Ablenkung", date: "" },
+        { badge: "🏋 Gym Rat", desc: "12 Wochen konsequent Training", date: "" }
+      ],
+      quote: {
+        text: "Ignore the noise. Build the empire. Collect XP.\nJeder Tag auf Hard Mode ist ein Level-Up."
+      }
+    };
+
+    let appData = { ...defaultData };
+
+    // Initialize app
+    function init() {
+      loadDataFromStorage();
+      renderAll();
+      setupEventListeners();
+    }
+
+    function setupEventListeners() {
+      // Auto-save on contenteditable changes
+      document.addEventListener('blur', (e) => {
+        if (e.target.hasAttribute('contenteditable') && e.target.hasAttribute('data-key')) {
+          const key = e.target.getAttribute('data-key');
+          const value = e.target.textContent.trim();
+          setNestedValue(appData, key, value);
+          autoSave();
+        }
+      }, true);
+
+      // Auto-save on input changes
+      document.addEventListener('input', (e) => {
+        if (e.target.hasAttribute('data-key')) {
+          const key = e.target.getAttribute('data-key');
+          const value = e.target.value;
+          setNestedValue(appData, key, value);
+          autoSave();
+        }
+      }, true);
+    }
+
+    function setNestedValue(obj, path, value) {
+      const keys = path.split('.');
+      let current = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+    }
+
+    function updateProgress(input, value) {
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      const key = input.getAttribute('data-key');
+      setNestedValue(appData, key, parseInt(value));
+      autoSave();
+    }
+
+    function renderAll() {
+      renderProfile();
+      renderMainQuests();
+      renderFinance();
+      renderExpenses();
+      renderStudy();
+      renderThesis();
+      renderFitness();
+      renderBusiness();
+      renderLifeMap();
+      renderReview();
+      renderAchievements();
+      renderQuote();
+    }
+
+    function renderProfile() {
+      document.querySelector('[data-key="profile.name"]').textContent = appData.profile.name;
+      document.querySelector('[data-key="profile.level"]').textContent = appData.profile.level;
+      document.querySelector('[data-key="profile.xp"]').textContent = appData.profile.xp;
+      document.querySelector('[data-key="profile.debt"]').textContent = appData.profile.debt;
+      document.querySelector('[data-key="profile.currentQuest"]').textContent = appData.profile.currentQuest;
+      document.querySelector('[data-key="profile.guild"]').textContent = appData.profile.guild;
+      
+      const progress = appData.profile.xpProgress || 50;
+      const progressInput = document.querySelector('[data-key="profile.xpProgress"]');
+      const progressBar = document.getElementById('profileXPBar');
+      const progressText = document.getElementById('profileXPText');
+      progressInput.value = progress;
+      progressBar.style.width = progress + '%';
+      progressText.textContent = progress;
+    }
+
+    function renderMainQuests() {
+      const tbody = document.querySelector('#mainQuestsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.mainQuests.forEach((q, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="quest">${q.quest}</span></td>
+          <td><input type="date" value="${q.deadline === 'laufend' ? '' : q.deadline}" data-array="mainQuests" data-index="${i}" data-field="deadline" style="width: 140px;"></td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${q.progress}" oninput="updateQuestProgress(this, ${i})">
+              <div class="bar" style="width:${q.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${q.progress}</span> %</div>
+          </td>
+          <td class="xp"><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="xp">${q.xp}</span> XP</td>
+          <td><span class="editable" contenteditable="true" data-array="mainQuests" data-index="${i}" data-field="reward">${q.reward}</span></td>
+          <td><button class="btn" onclick="removeQuest(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateQuestProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.mainQuests[index].progress = value;
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      autoSave();
+    }
+
+    function addQuest() {
+      appData.mainQuests.push({
+        quest: "Neue Quest",
+        deadline: new Date().toISOString().split('T')[0],
+        progress: 0,
+        xp: 0,
+        reward: ""
+      });
+      renderMainQuests();
+      autoSave();
+    }
+
+    function removeQuest(index) {
+      if (confirm('Quest wirklich löschen?')) {
+        appData.mainQuests.splice(index, 1);
+        renderMainQuests();
+        autoSave();
+      }
+    }
+
+    function renderFinance() {
+      const tbody = document.querySelector('#financeTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.finance.forEach((f, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${f.month}" data-array="finance" data-index="${i}" data-field="month"></td>
+          <td><input type="number" value="${f.income}" data-array="finance" data-index="${i}" data-field="income"></td>
+          <td><input type="number" value="${f.fixed}" data-array="finance" data-index="${i}" data-field="fixed"></td>
+          <td><input type="number" value="${f.variable}" data-array="finance" data-index="${i}" data-field="variable"></td>
+          <td><input type="number" value="${f.payment}" data-array="finance" data-index="${i}" data-field="payment"></td>
+          <td><input type="number" value="${f.debt}" data-array="finance" data-index="${i}" data-field="debt"></td>
+          <td class="xp"><input type="number" value="${f.xp}" data-array="finance" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeFinanceMonth(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addFinanceMonth() {
+      const lastMonth = appData.finance[appData.finance.length - 1];
+      const lastDebt = lastMonth ? lastMonth.debt : 8000;
+      appData.finance.push({
+        month: new Date().toISOString().slice(0, 7),
+        income: 2100,
+        fixed: 1200,
+        variable: 300,
+        payment: 1000,
+        debt: lastDebt - 1000,
+        xp: 50
+      });
+      renderFinance();
+      autoSave();
+    }
+
+    function removeFinanceMonth(index) {
+      if (confirm('Monat wirklich löschen?')) {
+        appData.finance.splice(index, 1);
+        renderFinance();
+        autoSave();
+      }
+    }
+
+    function renderExpenses() {
+      const tbody = document.querySelector('#expensesTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.expenses.forEach((e, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${e.category}" data-array="expenses" data-index="${i}" data-field="category"></td>
+          <td><input type="text" value="${e.desc}" data-array="expenses" data-index="${i}" data-field="desc"></td>
+          <td><input type="number" value="${e.amount}" data-array="expenses" data-index="${i}" data-field="amount"></td>
+          <td><input type="text" value="${e.frequency}" data-array="expenses" data-index="${i}" data-field="frequency"></td>
+          <td>
+            <select data-array="expenses" data-index="${i}" data-field="status" onchange="updateExpenseStatus(this, ${i})">
+              <option value="active" ${e.status === 'active' ? 'selected' : ''}>Aktiv</option>
+              <option value="variable" ${e.status === 'variable' ? 'selected' : ''}>Variabel</option>
+              <option value="open" ${e.status === 'open' ? 'selected' : ''}>Prüfen</option>
+            </select>
+          </td>
+          <td><button class="btn" onclick="removeExpense(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+      
+      const total = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+      const footer = tbody.insertRow();
+      footer.innerHTML = `
+        <td><b>Gesamt</b></td>
+        <td></td>
+        <td><b>≈${total}</b></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      `;
+    }
+
+    function updateExpenseStatus(select, index) {
+      appData.expenses[index].status = select.value;
+      renderExpenses();
+      autoSave();
+    }
+
+    function addExpense() {
+      appData.expenses.push({
+        category: "Neue Kategorie",
+        desc: "",
+        amount: 0,
+        frequency: "Monatlich",
+        status: "active"
+      });
+      renderExpenses();
+      autoSave();
+    }
+
+    function removeExpense(index) {
+      if (confirm('Ausgabe wirklich löschen?')) {
+        appData.expenses.splice(index, 1);
+        renderExpenses();
+        autoSave();
+      }
+    }
+
+    function renderStudy() {
+      const tbody = document.querySelector('#studyTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.study.forEach((s, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${s.subject}" data-array="study" data-index="${i}" data-field="subject"></td>
+          <td><input type="date" value="${s.date}" data-array="study" data-index="${i}" data-field="date"></td>
+          <td><input type="text" value="${s.status}" data-array="study" data-index="${i}" data-field="status"></td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${s.progress}" oninput="updateStudyProgress(this, ${i})">
+              <div class="bar" style="width:${s.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${s.progress}</span> %</div>
+          </td>
+          <td><input type="text" value="${s.next}" data-array="study" data-index="${i}" data-field="next"></td>
+          <td class="xp"><input type="number" value="${s.xp}" data-array="study" data-index="${i}" data-field="xp"></td>
+          <td><button class="btn" onclick="removeStudy(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateStudyProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.study[index].progress = value;
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      autoSave();
+    }
+
+    function addStudy() {
+      appData.study.push({
+        subject: "Neues Fach",
+        date: new Date().toISOString().split('T')[0],
+        status: "Offen",
+        progress: 0,
+        next: "",
+        xp: 0
+      });
+      renderStudy();
+      autoSave();
+    }
+
+    function removeStudy(index) {
+      if (confirm('Fach wirklich löschen?')) {
+        appData.study.splice(index, 1);
+        renderStudy();
+        autoSave();
+      }
+    }
+
+    function renderThesis() {
+      const tbody = document.querySelector('#thesisTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.thesis.forEach((t, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${t.phase}" data-array="thesis" data-index="${i}" data-field="phase"></td>
+          <td>
+            <select data-array="thesis" data-index="${i}" data-field="status" onchange="updateThesisStatus(this, ${i})">
+              <option value="open" ${t.status === 'open' ? 'selected' : ''}>Offen</option>
+              <option value="active" ${t.status === 'active' ? 'selected' : ''}>Aktiv</option>
+            </select>
+          </td>
+          <td>
+            <div class="progress-wrap">
+              <input type="range" min="0" max="100" value="${t.progress}" oninput="updateThesisProgress(this, ${i})">
+              <div class="bar" style="width:${t.progress}%"></div>
+            </div>
+            <div class="progress-text"><span>${t.progress}</span> %</div>
+          </td>
+          <td class="xp"><input type="number" value="${t.xp}" data-array="thesis" data-index="${i}" data-field="xp"></td>
+          <td><input type="text" value="${t.notes}" data-array="thesis" data-index="${i}" data-field="notes"></td>
+          <td><button class="btn" onclick="removeThesisPhase(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function updateThesisStatus(select, index) {
+      appData.thesis[index].status = select.value;
+      renderThesis();
+      autoSave();
+    }
+
+    function updateThesisProgress(input, index) {
+      const value = parseInt(input.value);
+      appData.thesis[index].progress = value;
+      const bar = input.parentElement.querySelector('.bar');
+      const text = input.parentElement.nextElementSibling.querySelector('span');
+      bar.style.width = value + '%';
+      text.textContent = value;
+      autoSave();
+    }
+
+    function addThesisPhase() {
+      appData.thesis.push({
+        phase: "Neue Phase",
+        status: "open",
+        progress: 0,
+        xp: 0,
+        notes: ""
+      });
+      renderThesis();
+      autoSave();
+    }
+
+    function removeThesisPhase(index) {
+      if (confirm('Phase wirklich löschen?')) {
+        appData.thesis.splice(index, 1);
+        renderThesis();
+        autoSave();
+      }
+    }
+
+    function renderFitness() {
+      const tbody = document.querySelector('#fitnessTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.fitness.forEach((f, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${f.day}" data-array="fitness" data-index="${i}" data-field="day"></td>
+          <td><input type="text" value="${f.workout}" data-array="fitness" data-index="${i}" data-field="workout"></td>
+          <td><input type="number" value="${f.duration}" data-array="fitness" data-index="${i}" data-field="duration"></td>
+          <td><input type="number" min="1" max="10" value="${f.intensity}" data-array="fitness" data-index="${i}" data-field="intensity"></td>
+          <td class="xp"><input type="number" value="${f.xp}" data-array="fitness" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeWorkout(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addWorkout() {
+      appData.fitness.push({
+        day: "Montag",
+        workout: "Workout",
+        duration: 60,
+        intensity: 7,
+        xp: 10
+      });
+      renderFitness();
+      autoSave();
+    }
+
+    function removeWorkout(index) {
+      if (confirm('Workout wirklich löschen?')) {
+        appData.fitness.splice(index, 1);
+        renderFitness();
+        autoSave();
+      }
+    }
+
+    function renderBusiness() {
+      const tbody = document.querySelector('#businessTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.business.forEach((b, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${b.task}" data-array="business" data-index="${i}" data-field="task"></td>
+          <td><input type="text" value="${b.status}" data-array="business" data-index="${i}" data-field="status"></td>
+          <td><input type="date" value="${b.deadline}" data-array="business" data-index="${i}" data-field="deadline"></td>
+          <td class="xp"><input type="number" value="${b.xp}" data-array="business" data-index="${i}" data-field="xp"> XP</td>
+          <td><button class="btn" onclick="removeBusinessTask(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addBusinessTask() {
+      appData.business.push({
+        task: "Neue Task",
+        status: "Offen",
+        deadline: new Date().toISOString().split('T')[0],
+        xp: 0
+      });
+      renderBusiness();
+      autoSave();
+    }
+
+    function removeBusinessTask(index) {
+      if (confirm('Task wirklich löschen?')) {
+        appData.business.splice(index, 1);
+        renderBusiness();
+        autoSave();
+      }
+    }
+
+    function renderLifeMap() {
+      const tbody = document.querySelector('#lifeMapTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.lifeMap.forEach((l, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${l.period}" data-array="lifeMap" data-index="${i}" data-field="period"></td>
+          <td><input type="text" value="${l.life}" data-array="lifeMap" data-index="${i}" data-field="life"></td>
+          <td><input type="text" value="${l.career}" data-array="lifeMap" data-index="${i}" data-field="career"></td>
+          <td><input type="text" value="${l.finance}" data-array="lifeMap" data-index="${i}" data-field="finance"></td>
+          <td><input type="text" value="${l.private}" data-array="lifeMap" data-index="${i}" data-field="private"></td>
+          <td><input type="text" value="${l.mental}" data-array="lifeMap" data-index="${i}" data-field="mental"></td>
+          <td><button class="btn" onclick="removeLifeMapEntry(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addLifeMapEntry() {
+      appData.lifeMap.push({
+        period: "2025–2026",
+        life: "",
+        career: "",
+        finance: "",
+        private: "",
+        mental: ""
+      });
+      renderLifeMap();
+      autoSave();
+    }
+
+    function removeLifeMapEntry(index) {
+      if (confirm('Eintrag wirklich löschen?')) {
+        appData.lifeMap.splice(index, 1);
+        renderLifeMap();
+        autoSave();
+      }
+    }
+
+    function renderReview() {
+      const tbody = document.querySelector('#reviewTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.review.forEach((r, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${r.question}</td>
+          <td><textarea data-array="review" data-index="${i}" data-field="answer" rows="2" style="width: 100%;">${r.answer}</textarea></td>
+        `;
+      });
+    }
+
+    function renderAchievements() {
+      const tbody = document.querySelector('#achievementsTable');
+      const header = tbody.querySelector('tr');
+      tbody.innerHTML = '';
+      tbody.appendChild(header);
+      
+      appData.achievements.forEach((a, i) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td><input type="text" value="${a.badge}" data-array="achievements" data-index="${i}" data-field="badge"></td>
+          <td><input type="text" value="${a.desc}" data-array="achievements" data-index="${i}" data-field="desc"></td>
+          <td><input type="date" value="${a.date}" data-array="achievements" data-index="${i}" data-field="date"></td>
+          <td><button class="btn" onclick="removeAchievement(${i})" style="padding: 4px 8px; font-size: 0.75rem;">🗑️</button></td>
+        `;
+      });
+    }
+
+    function addAchievement() {
+      appData.achievements.push({
+        badge: "🏆 Neues Achievement",
+        desc: "",
+        date: ""
+      });
+      renderAchievements();
+      autoSave();
+    }
+
+    function removeAchievement(index) {
+      if (confirm('Achievement wirklich löschen?')) {
+        appData.achievements.splice(index, 1);
+        renderAchievements();
+        autoSave();
+      }
+    }
+
+    function renderQuote() {
+      document.querySelector('[data-key="quote.text"]').textContent = appData.quote.text;
+    }
+
+    // Data management
+    function loadDataFromStorage() {
+      const saved = localStorage.getItem('lifeGameDashboard');
+      if (saved) {
+        try {
+          appData = JSON.parse(saved);
+          // Merge with default to handle new fields
+          appData = { ...defaultData, ...appData };
+        } catch (e) {
+          console.error('Error loading data:', e);
+        }
+      }
+    }
+
+    function saveData() {
+      // Update all array inputs
+      document.querySelectorAll('[data-array]').forEach(el => {
+        const array = el.getAttribute('data-array');
+        const index = parseInt(el.getAttribute('data-index'));
+        const field = el.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          appData[array][index][field] = el.value || el.textContent.trim();
+        }
+      });
+      
+      localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+      showSaveIndicator();
+    }
+
+    function autoSave() {
+      // Update array inputs before saving
+      document.querySelectorAll('[data-array]').forEach(el => {
+        const array = el.getAttribute('data-array');
+        const index = parseInt(el.getAttribute('data-index'));
+        const field = el.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+            appData[array][index][field] = el.value;
+          } else {
+            appData[array][index][field] = el.textContent.trim();
+          }
+        }
+      });
+      
+      localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+      showSaveIndicator();
+    }
+
+    function loadData() {
+      loadDataFromStorage();
+      renderAll();
+      showSaveIndicator();
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'life-game-dashboard-' + new Date().toISOString().split('T')[0] + '.json';
+      link.click();
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const imported = JSON.parse(event.target.result);
+              appData = { ...defaultData, ...imported };
+              localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+              renderAll();
+              showSaveIndicator();
+              alert('Daten erfolgreich importiert!');
+            } catch (err) {
+              alert('Fehler beim Importieren: ' + err.message);
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    }
+
+    function resetData() {
+      if (confirm('Wirklich alle Daten zurücksetzen? Dies kann nicht rückgängig gemacht werden!')) {
+        appData = JSON.parse(JSON.stringify(defaultData));
+        localStorage.setItem('lifeGameDashboard', JSON.stringify(appData));
+        renderAll();
+        showSaveIndicator();
+      }
+    }
+
+    function showSaveIndicator() {
+      const indicator = document.getElementById('saveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+
+    // Handle array field updates
+    document.addEventListener('input', (e) => {
+      if (e.target.hasAttribute('data-array')) {
+        const array = e.target.getAttribute('data-array');
+        const index = parseInt(e.target.getAttribute('data-index'));
+        const field = e.target.getAttribute('data-field');
+        if (appData[array] && appData[array][index]) {
+          appData[array][index][field] = e.target.value;
+          autoSave();
+        }
+      }
+    });
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
+
